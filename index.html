@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ことのはたんご 🌸</title>
+    <title>みんなのたんご</title>
     <style>
         :root {
             --color-correct: #6aaa64;
@@ -19,24 +19,35 @@
         }
         
         body {
-            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
-            background: #ffffff;
+            font-family: 'MS PGothic', 'MS Gothic', 'Meiryo', sans-serif;
+            background: #efefef;
             display: flex;
             justify-content: center;
             padding: 20px;
             min-height: 100vh;
+            color: #000;
+        }
+        
+        .ascii-art {
+            white-space: pre;
+            font-family: 'MS Gothic', 'Osaka-等幅', 'Consolas', monospace;
+            line-height: 1.2;
+            font-size: 14px;
         }
         
         .container {
             max-width: 600px;
             width: 100%;
+            background: #fff;
+            border: 1px solid #ccc;
         }
         
         header {
             text-align: center;
             margin-bottom: 20px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid #d3d6da;
+            padding: 20px;
+            background: #e0e0e0;
+            border-bottom: 2px solid #999;
         }
         
         h1 {
@@ -337,12 +348,89 @@
         .game-area.active {
             display: block;
         }
+        
+        .start-screen {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .start-screen.active {
+            display: block;
+        }
+        
+        .tree-area {
+            margin: 30px 0;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 8px;
+        }
+        
+        .ascii-art {
+            white-space: pre;
+            font-family: "MS PGothic", "Mona", "IPAMonaGothic", sans-serif;
+            line-height: 1.1;
+            font-size: 16px;
+            color: #000;
+            margin: 20px 0;
+            overflow-x: auto;
+        }
+        
+        .cat-message {
+            white-space: pre;
+            font-family: 'MS Gothic', 'Osaka-等幅', 'Consolas', monospace;
+            line-height: 1.2;
+            font-size: 14px;
+            margin: 20px 0;
+            color: #000;
+        }
+        
+        .rules {
+            text-align: left;
+            max-width: 400px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            border: 2px solid #d3d6da;
+        }
+        
+        .rules li {
+            margin: 10px 0;
+            font-size: 14px;
+        }
+        
+        .start-btn {
+            display: inline-block;
+            margin: 30px auto;
+            padding: 15px 50px;
+            font-size: 20px;
+            background-color: var(--color-correct);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .start-btn:hover {
+            background-color: #5a9a54;
+        }
+        
+        .current-slot-info {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f0f0f0;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #666;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>ことのはたんご 🌸</h1>
+            <h1>みんなのたンゴ</h1>
             <div class="slot-info" id="slotInfo">読み込み中...</div>
             <div class="stats">
                 <div class="stat-item">
@@ -364,11 +452,50 @@
             読み込み中...
         </div>
         
+        <div class="start-screen" id="startScreen">
+            <div class="tree-area">
+                <div class="ascii-art" id="treeArt"></div>
+                <p style="font-size: 18px; font-weight: bold; margin: 10px 0;">現在の辞書: <span id="startDictSize">-</span>語</p>
+            </div>
+            
+            <div class="cat-message">　　　∧＿∧
+　　（　´・ω・）ルール説明するにゃ！
+　　（　　つ旦Ｏ
+　　と＿_)</div>
+            
+            <div class="rules">
+                <ul style="list-style: none; padding: 0;">
+                    <li>・5文字の日本語を当てるにゃ</li>
+                    <li>・7回まで挑戦できるにゃ</li>
+                    <li>・3時間に1回、みんな同じ問題にゃ</li>
+                    <li>・辞書にない単語は登録できるにゃ</li>
+                    <li>・登録した単語は次回出題されるにゃ</li>
+                </ul>
+            </div>
+            
+            <div class="cat-message">　　　∧＿∧
+　　（　´・ω・）今日も地球
+　　（　　つ旦Ｏ　救っちゃう…？
+　　と＿_)</div>
+            
+            <button class="start-btn" id="startGameBtn">ゲームを始める</button>
+            
+            <div class="current-slot-info">
+                <div>現在の出題: <span id="startSlotInfo">-</span></div>
+                <div style="margin-top: 5px;">挑戦者: <span id="startPlayerCount">-</span>人　正解率: <span id="startCorrectRate">-</span></div>
+            </div>
+        </div>
+        
         <div class="wait-screen" id="waitScreen">
             <h2>次の出題まで</h2>
             <div class="countdown" id="countdown">--:--:--</div>
             
             <div class="your-result" id="yourResult"></div>
+            
+            <div class="cat-message">　　　∧＿∧
+　　（　´・ω・）みんなのおかげで
+　　（　　つ旦Ｏ　緑の惑星復活にゃ！
+　　と＿_)</div>
             
             <button class="share-btn" id="shareBtn">結果をシェア</button>
         </div>
@@ -454,6 +581,7 @@
 
         // DOM要素
         const loading = document.getElementById('loading');
+        const startScreen = document.getElementById('startScreen');
         const waitScreen = document.getElementById('waitScreen');
         const gameArea = document.getElementById('gameArea');
         const slotInfo = document.getElementById('slotInfo');
@@ -472,6 +600,14 @@
         const confirmMessage = document.getElementById('confirmMessage');
         const registerWordBtn = document.getElementById('registerWordBtn');
         const cancelRegisterBtn = document.getElementById('cancelRegisterBtn');
+        
+        // スタート画面要素
+        const startGameBtn = document.getElementById('startGameBtn');
+        const treeArt = document.getElementById('treeArt');
+        const startDictSize = document.getElementById('startDictSize');
+        const startSlotInfo = document.getElementById('startSlotInfo');
+        const startPlayerCount = document.getElementById('startPlayerCount');
+        const startCorrectRate = document.getElementById('startCorrectRate');
 
         // タイムスロット計算
         function getCurrentSlot() {
@@ -605,6 +741,13 @@
                     : 0;
                 correctRateEl.textContent = rate + '%';
             }
+            
+            // 木の成長を更新
+            const wordCount = Object.keys(wordPool).length;
+            const treeStage = getTreeStage(wordCount);
+            if (treeArt) {
+                treeArt.textContent = treeStage.art;
+            }
         }
 
         // リアルタイム統計監視
@@ -714,7 +857,7 @@
             currentTiles.forEach(tile => tile.classList.remove('filled'));
             
             // 勝敗判定
-            if (guess === targetWord) {
+            if (toHiragana(guess) === toHiragana(targetWord)) {
                 gameOver = true;
                 showMessage('🎉 正解！おめでとうございます！', 'success');
                 
@@ -757,12 +900,16 @@
 
         // 判定ロジック
         function evaluateGuess(guess, answer) {
+            // ひらがなに統一して判定
+            const normalizedGuess = toHiragana(guess);
+            const normalizedAnswer = toHiragana(answer);
+            
             const result = Array(5).fill('absent');
-            const answerChars = answer.split('');
+            const answerChars = normalizedAnswer.split('');
             const usedIndices = new Set();
             
             for (let i = 0; i < 5; i++) {
-                if (guess[i] === answer[i]) {
+                if (normalizedGuess[i] === normalizedAnswer[i]) {
                     result[i] = 'correct';
                     usedIndices.add(i);
                 }
@@ -772,7 +919,7 @@
                 if (result[i] === 'correct') continue;
                 
                 for (let j = 0; j < 5; j++) {
-                    if (!usedIndices.has(j) && guess[i] === answer[j]) {
+                    if (!usedIndices.has(j) && normalizedGuess[i] === normalizedAnswer[j]) {
                         result[i] = 'present';
                         usedIndices.add(j);
                         break;
@@ -809,6 +956,58 @@
             const k = hiraganaToKatakana[h];
             katakanaToHiragana[k] = h;
         });
+
+        // 文字列をひらがなに統一
+        function toHiragana(str) {
+            return str.split('').map(char => katakanaToHiragana[char] || char).join('');
+        }
+
+        // 木の成長段階を取得
+        function getTreeStage(wordCount) {
+            if (wordCount < 200) {
+                return {
+                    art: `　　　∧＿∧
+　　（　´・ω・）種をまいたよ
+　　（　　つ●Ｏ
+　　と＿_)`,
+                    message: 'みんなで種をまいたよ！'
+                };
+            } else if (wordCount < 500) {
+                return {
+                    art: `　　　　　∧
+　　　　／|＼
+　　　∧＿∧
+　　（　´・ω・）芽が出たよ！
+　　（　　つ旦Ｏ
+　　と＿_)`,
+                    message: 'みんなで芽を育ててるよ！'
+                };
+            } else if (wordCount < 1000) {
+                return {
+                    art: `　　　　＼|／
+　　　──┼──
+　　　　／|＼
+　　　　　｜
+　　　∧＿∧
+　　（　´・ω・）木が育ったよ！
+　　（　　つ旦Ｏ
+　　と＿_)`,
+                    message: 'みんなで木を育ててるよ！'
+                };
+            } else {
+                return {
+                    art: `ｖｖｖ　ｖｖ　ｖｖｖ　　ｖｖｖ　　ｖｖ　　ｖｖ
+　ｖｖｖ　　　ｖｖｖ　　ｖｖ　　　ｖｖ　ｖｖｖ　　ｖｖ
+　　ｖｖ　　ｖｖｖ　ｖｖ　　ｖｖｖ　　　ｖｖ　ｖｖｖ
+　　　ｖｖ　　　ｖｖ　　∧＿∧　　ｖｖ　　　ｖｖ
+　　ｖｖ　ｖｖｖ　　（　´・ω・）　ｖｖｖ　ｖｖ
+　ｖｖ　　　ｖｖ　（　　つ旦Ｏ　ｖｖ　　　ｖｖｖ
+　　ｖｖｖ　　ｖｖ　と＿_)　　ｖｖ　　ｖｖ
+　　　ｖｖ　ｖｖｖ　　　ｖｖ　　ｖｖｖ　ｖｖ`,
+                    message: 'みんなのおかげで森になったよ！'
+                };
+            }
+        }
 
         // キーボード更新（ひらがな・カタカナ両方塗る）
         function updateKeyboard(guess, result) {
@@ -936,7 +1135,7 @@
             const resultData = JSON.parse(localStorage.getItem(`result_${currentSlot}`) || '{}');
             if (!resultData.attempts) return;
             
-            let text = `ことのはたんご ${formatSlotInfo(currentSlot)}\n\n`;
+            let text = `みんなのたンゴ ${formatSlotInfo(currentSlot)}\n\n`;
             resultData.attempts.forEach(att => {
                 att.result.forEach(r => {
                     text += r === 'correct' ? '🟩' : r === 'present' ? '🟨' : '⬜';
@@ -944,7 +1143,7 @@
                 text += '\n';
             });
             text += `\n${resultData.success ? `${resultData.attempts.length}回で正解！` : '失敗'}\n`;
-            text += '\nhttps://your-url.github.io/kotonoha-tango/';
+            text += '\nhttps://jnry1189.github.io/mutsunoha_tango/';
             
             if (navigator.share) {
                 navigator.share({ text: text });
@@ -973,10 +1172,33 @@
                 
                 loading.style.display = 'none';
                 
+                // スタート画面の統計情報更新
+                const wordCount = Object.keys(wordPool).length;
+                startDictSize.textContent = wordCount;
+                startSlotInfo.textContent = formatSlotInfo(currentSlot);
+                
+                const statsRef = ref(db, `currentWords/${currentSlot}`);
+                const snapshot = await get(statsRef);
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    startPlayerCount.textContent = data.playerCount || 0;
+                    const rate = data.playerCount > 0 
+                        ? Math.round((data.correctCount || 0) / data.playerCount * 100)
+                        : 0;
+                    startCorrectRate.textContent = rate + '%';
+                }
+                
                 if (canPlay()) {
-                    gameArea.classList.add('active');
-                    createBoard();
-                    createKeyboard();
+                    // スタート画面を表示
+                    startScreen.classList.add('active');
+                    
+                    // ゲーム開始ボタン
+                    startGameBtn.addEventListener('click', () => {
+                        startScreen.classList.remove('active');
+                        gameArea.classList.add('active');
+                        createBoard();
+                        createKeyboard();
+                    });
                     
                     guessInput.addEventListener('input', handleInput);
                     submitBtn.addEventListener('click', handleSubmit);
@@ -1012,3 +1234,4 @@
     </script>
 </body>
 </html>
+
