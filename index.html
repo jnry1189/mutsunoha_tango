@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ことのはたんご 🌸</title>
+    <style>
+        :root {
+            --color-correct: #6aaa64;
+            --color-present: #c9b458;
+            --color-absent: #787c7e;
+            --color-border: #d3d6da;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
+            background: #ffffff;
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 600px;
+            width: 100%;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #d3d6da;
+        }
+        
+        h1 {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .slot-info {
+            font-size: 14px;
+            color: #666;
+            margin-top: 10px;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 15px;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 18px;
+            color: #666;
+        }
+        
+        .wait-screen {
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .wait-screen h2 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        
+        .countdown {
+            font-size: 48px;
+            font-weight: bold;
+            color: var(--color-correct);
+            margin: 20px 0;
+        }
+        
+        .your-result {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 8px;
+        }
+        
+        .result-tiles {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            margin: 15px 0;
+        }
+        
+        .result-row {
+            display: flex;
+            gap: 5px;
+            justify-content: center;
+        }
+        
+        .result-tile {
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 4px;
+        }
+        
+        .board {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .row {
+            display: flex;
+            gap: 5px;
+            justify-content: center;
+        }
+        
+        .tile {
+            width: 50px;
+            height: 50px;
+            border: 2px solid var(--color-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+        }
+        
+        .tile.filled {
+            border-color: #888;
+        }
+        
+        .tile.correct {
+            background-color: var(--color-correct);
+            border-color: var(--color-correct);
+            color: white;
+        }
+        
+        .tile.present {
+            background-color: var(--color-present);
+            border-color: var(--color-present);
+            color: white;
+        }
+        
+        .tile.absent {
+            background-color: var(--color-absent);
+            border-color: var(--color-absent);
+            color: white;
+        }
+        
+        .input-area {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        
+        #guessInput {
+            font-size: 18px;
+            padding: 10px;
+            width: 200px;
+            border: 2px solid var(--color-border);
+            border-radius: 4px;
+        }
+        
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        #submitBtn {
+            background-color: #6aaa64;
+            color: white;
+        }
+        
+        #submitBtn:hover {
+            background-color: #5a9a54;
+        }
+        
+        #submitBtn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .secondary-btn {
+            background-color: #e0e0e0;
+            color: #333;
+        }
+        
+        .secondary-btn:hover {
+            background-color: #d0d0d0;
+        }
+        
+        .message {
+            text-align: center;
+            margin-bottom: 20px;
+            min-height: 30px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .message.success {
+            color: var(--color-correct);
+        }
+        
+        .message.error {
+            color: #d32f2f;
+        }
+        
+        .keyboard {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 4px;
+            margin-bottom: 20px;
+        }
+        
+        .key {
+            padding: 8px 4px;
+            font-size: 12px;
+            font-weight: bold;
+            background-color: #d3d6da;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .key:hover {
+            background-color: #c3c6ca;
+        }
+        
+        .key.correct {
+            background-color: var(--color-correct);
+            color: white;
+        }
+        
+        .key.present {
+            background-color: var(--color-present);
+            color: white;
+        }
+        
+        .key.absent {
+            background-color: var(--color-absent);
+            color: white;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 30px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+        }
+        
+        .modal h2 {
+            margin-bottom: 20px;
+        }
+        
+        .modal p {
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        
+        .btn-primary {
+            background-color: #2196F3;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #1976D2;
+        }
+        
+        .share-btn {
+            display: block;
+            margin: 20px auto;
+            background-color: #1DA1F2;
+            color: white;
+            padding: 12px 30px;
+        }
+        
+        .share-btn:hover {
+            background-color: #1a8cd8;
+        }
+        
+        .game-area {
+            display: none;
+        }
+        
+        .game-area.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>ことのはたんご 🌸</h1>
+            <div class="slot-info" id="slotInfo">読み込み中...</div>
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="playerCount">-</div>
+                    <div>挑戦者</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="correctRate">-</div>
+                    <div>正解率</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="wordPoolSize">-</div>
+                    <div>辞書</div>
+                </div>
+            </div>
+        </header>
+        
+        <div class="loading" id="loading">
+            読み込み中...
+        </div>
+        
+        <div class="wait-screen" id="waitScreen">
+            <h2>次の出題まで</h2>
+            <div class="countdown" id="countdown">--:--:--</div>
+            
+            <div class="your-result" id="yourResult"></div>
+            
+            <button class="share-btn" id="shareBtn">結果をシェア</button>
+        </div>
+        
+        <div class="game-area" id="gameArea">
+            <div class="message" id="message"></div>
+            
+            <div class="board" id="board"></div>
+            
+            <div class="input-area">
+                <input type="text" id="guessInput" maxlength="5" placeholder="5文字入力">
+                <button id="submitBtn">決定</button>
+            </div>
+            
+            <div class="keyboard" id="keyboard"></div>
+        </div>
+    </div>
+    
+    <!-- 単語登録確認モーダル -->
+    <div id="confirmModal" class="modal">
+        <div class="modal-content">
+            <h2>辞書にない単語です</h2>
+            <p id="confirmMessage"></p>
+            <div class="modal-buttons">
+                <button class="btn-primary" id="registerWordBtn">登録する</button>
+                <button class="secondary-btn" id="cancelRegisterBtn">キャンセル</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+        import { getDatabase, ref, get, set, update, onValue } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js';
+
+        // Firebase設定
+        const firebaseConfig = {
+            apiKey: "AIzaSyCrJ-2vCD8Nt_14bwBq-gM-sX-rcZNerNw",
+            authDomain: "mutsuki-570fe.firebaseapp.com",
+            databaseURL: "https://mutsuki-570fe-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "mutsuki-570fe",
+            storageBucket: "mutsuki-570fe.firebasestorage.app",
+            messagingSenderId: "836531971594",
+            appId: "1:836531971594:web:3b040cca5a57e1b67421f3"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // デバッグモード
+        const DEBUG = true;
+
+        // 50音キーボード
+        const KEYBOARD_CHARS = [
+            'あ', 'い', 'う', 'え', 'お', 'か', 'き', 'く', 'け', 'こ',
+            'さ', 'し', 'す', 'せ', 'そ', 'た', 'ち', 'つ', 'て', 'と',
+            'な', 'に', 'ぬ', 'ね', 'の', 'は', 'ひ', 'ふ', 'へ', 'ほ',
+            'ま', 'み', 'む', 'め', 'も', 'や', 'ゆ', 'よ', 'ら', 'り',
+            'る', 'れ', 'ろ', 'わ', 'を', 'ん', 'が', 'ぎ', 'ぐ', 'げ',
+            'ご', 'ざ', 'じ', 'ず', 'ぜ', 'ぞ', 'だ', 'ぢ', 'づ', 'で',
+            'ど', 'ば', 'び', 'ぶ', 'べ', 'ぼ', 'ぱ', 'ぴ', 'ぷ', 'ぺ',
+            'ぽ', 'ゃ', 'ゅ', 'ょ', 'っ', 'ァ', 'ィ', 'ゥ', 'ェ', 'ォ',
+            'ア', 'イ', 'ウ', 'エ', 'オ', 'カ', 'キ', 'ク', 'ケ', 'コ',
+            'サ', 'シ', 'ス', 'セ', 'ソ', 'タ', 'チ', 'ツ', 'テ', 'ト',
+            'ナ', 'ニ', 'ヌ', 'ネ', 'ノ', 'ハ', 'ヒ', 'フ', 'ヘ', 'ホ',
+            'マ', 'ミ', 'ム', 'メ', 'モ', 'ヤ', 'ユ', 'ヨ', 'ラ', 'リ',
+            'ル', 'レ', 'ロ', 'ワ', 'ヲ', 'ン', 'ガ', 'ギ', 'グ', 'ゲ',
+            'ゴ', 'ザ', 'ジ', 'ズ', 'ゼ', 'ゾ', 'ダ', 'ヂ', 'ヅ', 'デ',
+            'ド', 'バ', 'ビ', 'ブ', 'ベ', 'ボ', 'パ', 'ピ', 'プ', 'ペ',
+            'ポ', 'ャ', 'ュ', 'ョ', 'ッ'
+        ];
+
+        // ゲーム状態
+        let currentSlot = '';
+        let targetWord = '';
+        let currentAttempt = 0;
+        let maxAttempts = 7;
+        let gameOver = false;
+        let keyboardState = {};
+        let pendingWord = '';
+        let wordPool = {};
+        let attempts = [];
+
+        // DOM要素
+        const loading = document.getElementById('loading');
+        const waitScreen = document.getElementById('waitScreen');
+        const gameArea = document.getElementById('gameArea');
+        const slotInfo = document.getElementById('slotInfo');
+        const playerCountEl = document.getElementById('playerCount');
+        const correctRateEl = document.getElementById('correctRate');
+        const wordPoolSizeEl = document.getElementById('wordPoolSize');
+        const countdown = document.getElementById('countdown');
+        const yourResult = document.getElementById('yourResult');
+        const shareBtn = document.getElementById('shareBtn');
+        const board = document.getElementById('board');
+        const guessInput = document.getElementById('guessInput');
+        const submitBtn = document.getElementById('submitBtn');
+        const messageEl = document.getElementById('message');
+        const keyboard = document.getElementById('keyboard');
+        const confirmModal = document.getElementById('confirmModal');
+        const confirmMessage = document.getElementById('confirmMessage');
+        const registerWordBtn = document.getElementById('registerWordBtn');
+        const cancelRegisterBtn = document.getElementById('cancelRegisterBtn');
+
+        // タイムスロット計算
+        function getCurrentSlot() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hour = Math.floor(now.getHours() / 3) * 3;
+            return `${year}-${month}-${day}-${String(hour).padStart(2, '0')}`;
+        }
+
+        // スロット情報表示
+        function formatSlotInfo(slot) {
+            const [year, month, day, hour] = slot.split('-');
+            const startHour = parseInt(hour);
+            const endHour = (startHour + 3) % 24;
+            return `${year}/${month}/${day} ${String(startHour).padStart(2, '0')}:00 - ${String(endHour).padStart(2, '0')}:00`;
+        }
+
+        // 次のスロットまでのカウントダウン
+        function updateCountdown() {
+            const now = new Date();
+            const currentHour = now.getHours();
+            const nextSlotHour = (Math.floor(currentHour / 3) + 1) * 3;
+            const nextSlot = new Date(now);
+            nextSlot.setHours(nextSlotHour, 0, 0, 0);
+            
+            if (nextSlotHour >= 24) {
+                nextSlot.setDate(nextSlot.getDate() + 1);
+                nextSlot.setHours(0, 0, 0, 0);
+            }
+            
+            const diff = nextSlot - now;
+            const hours = Math.floor(diff / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+            
+            countdown.textContent = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+
+        // プレイ可能かチェック
+        function canPlay() {
+            const lastPlayedSlot = localStorage.getItem('lastPlayedSlot');
+            return currentSlot !== lastPlayedSlot;
+        }
+
+        // プレイ済みマーク
+        function markAsPlayed() {
+            localStorage.setItem('lastPlayedSlot', currentSlot);
+            const resultData = {
+                attempts: attempts,
+                success: gameOver && attempts[attempts.length - 1]?.word === targetWord,
+                answer: targetWord
+            };
+            localStorage.setItem(`result_${currentSlot}`, JSON.stringify(resultData));
+        }
+
+        // 単語プール取得
+        async function loadWordPool() {
+            const snapshot = await get(ref(db, 'wordPool'));
+            if (snapshot.exists()) {
+                wordPool = snapshot.val();
+                wordPoolSizeEl.textContent = Object.keys(wordPool).length;
+            }
+        }
+
+        // 現在の単語取得または選定
+        async function getCurrentWord() {
+            const wordRef = ref(db, `currentWords/${currentSlot}`);
+            const snapshot = await get(wordRef);
+            
+            if (snapshot.exists()) {
+                return snapshot.val().word;
+            }
+            
+            // 新しいスロットなので単語を選定
+            const words = Object.keys(wordPool);
+            
+            // 過去10回分の単語を取得
+            const recentSlots = await getRecentSlots(10);
+            const recentWords = [];
+            for (const slot of recentSlots) {
+                const slotSnapshot = await get(ref(db, `currentWords/${slot}`));
+                if (slotSnapshot.exists()) {
+                    recentWords.push(slotSnapshot.val().word);
+                }
+            }
+            
+            // 最近使われていない単語から選ぶ
+            const availableWords = words.filter(w => !recentWords.includes(w));
+            const selectedWord = availableWords.length > 0 
+                ? availableWords[Math.floor(Math.random() * availableWords.length)]
+                : words[Math.floor(Math.random() * words.length)];
+            
+            // Firebaseに保存
+            await set(wordRef, {
+                word: selectedWord,
+                startTime: new Date().toISOString(),
+                playerCount: 0,
+                correctCount: 0
+            });
+            
+            return selectedWord;
+        }
+
+        // 過去のスロット取得
+        function getRecentSlots(count) {
+            const slots = [];
+            const now = new Date();
+            for (let i = 1; i <= count; i++) {
+                const slotTime = new Date(now.getTime() - (i * 3 * 60 * 60 * 1000));
+                const year = slotTime.getFullYear();
+                const month = String(slotTime.getMonth() + 1).padStart(2, '0');
+                const day = String(slotTime.getDate()).padStart(2, '0');
+                const hour = String(Math.floor(slotTime.getHours() / 3) * 3).padStart(2, '0');
+                slots.push(`${year}-${month}-${day}-${hour}`);
+            }
+            return slots;
+        }
+
+        // 統計更新
+        async function updateStats() {
+            const statsRef = ref(db, `currentWords/${currentSlot}`);
+            const snapshot = await get(statsRef);
+            
+            if (snapshot.exists()) {
+                const data = snapshot.val();
+                playerCountEl.textContent = data.playerCount || 0;
+                const rate = data.playerCount > 0 
+                    ? Math.round((data.correctCount || 0) / data.playerCount * 100)
+                    : 0;
+                correctRateEl.textContent = rate + '%';
+            }
+        }
+
+        // リアルタイム統計監視
+        function watchStats() {
+            const statsRef = ref(db, `currentWords/${currentSlot}`);
+            onValue(statsRef, (snapshot) => {
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    playerCountEl.textContent = data.playerCount || 0;
+                    const rate = data.playerCount > 0 
+                        ? Math.round((data.correctCount || 0) / data.playerCount * 100)
+                        : 0;
+                    correctRateEl.textContent = rate + '%';
+                }
+            });
+        }
+
+        // 盤面作成
+        function createBoard() {
+            board.innerHTML = '';
+            for (let i = 0; i < maxAttempts; i++) {
+                const row = document.createElement('div');
+                row.className = 'row';
+                for (let j = 0; j < 5; j++) {
+                    const tile = document.createElement('div');
+                    tile.className = 'tile';
+                    row.appendChild(tile);
+                }
+                board.appendChild(row);
+            }
+        }
+
+        // キーボード作成
+        function createKeyboard() {
+            keyboard.innerHTML = '';
+            KEYBOARD_CHARS.forEach(char => {
+                const key = document.createElement('button');
+                key.className = 'key';
+                key.textContent = char;
+                key.addEventListener('click', () => {
+                    if (guessInput.value.length < 5 && !gameOver) {
+                        guessInput.value += char;
+                        guessInput.dispatchEvent(new Event('input'));
+                    }
+                });
+                keyboard.appendChild(key);
+                keyboardState[char] = '';
+            });
+        }
+
+        // 入力処理
+        function handleInput() {
+            const val = guessInput.value;
+            const row = board.children[currentAttempt];
+            const tiles = row.querySelectorAll('.tile');
+            
+            for (let i = 0; i < 5; i++) {
+                tiles[i].textContent = val[i] || '';
+                if (val[i]) {
+                    tiles[i].classList.add('filled');
+                } else {
+                    tiles[i].classList.remove('filled');
+                }
+            }
+        }
+
+        // 決定ボタン処理
+        async function handleSubmit() {
+            if (gameOver) return;
+            
+            const guess = guessInput.value;
+            
+            if (guess.length !== 5) {
+                showMessage('5文字入力してください', 'error');
+                return;
+            }
+            
+            // 辞書チェック
+            if (!wordPool[guess]) {
+                pendingWord = guess;
+                confirmMessage.textContent = `「${guess}」は辞書にありません。\n登録しますか？（次回以降の出題に使われます）`;
+                confirmModal.style.display = 'block';
+                return;
+            }
+            
+            processGuess(guess);
+        }
+
+        // 推測処理
+        async function processGuess(guess) {
+            const result = evaluateGuess(guess, targetWord);
+            const row = board.children[currentAttempt];
+            const tiles = row.querySelectorAll('.tile');
+            
+            tiles.forEach((tile, i) => {
+                tile.classList.add(result[i]);
+            });
+            
+            updateKeyboard(guess, result);
+            
+            // 試行記録
+            attempts.push({ word: guess, result: result });
+            
+            guessInput.value = '';
+            const currentRow = board.children[currentAttempt];
+            const currentTiles = currentRow.querySelectorAll('.tile');
+            currentTiles.forEach(tile => tile.classList.remove('filled'));
+            
+            // 勝敗判定
+            if (guess === targetWord) {
+                gameOver = true;
+                showMessage('🎉 正解！おめでとうございます！', 'success');
+                
+                // 統計更新
+                const statsRef = ref(db, `currentWords/${currentSlot}`);
+                const snapshot = await get(statsRef);
+                const data = snapshot.val();
+                await update(statsRef, {
+                    playerCount: (data.playerCount || 0) + 1,
+                    correctCount: (data.correctCount || 0) + 1
+                });
+                
+                markAsPlayed();
+                
+                setTimeout(() => {
+                    showWaitScreen();
+                }, 2000);
+            } else {
+                currentAttempt++;
+                if (currentAttempt >= maxAttempts) {
+                    gameOver = true;
+                    showMessage(`😢 残念！正解は「${targetWord}」でした`, 'error');
+                    
+                    // 統計更新（失敗）
+                    const statsRef = ref(db, `currentWords/${currentSlot}`);
+                    const snapshot = await get(statsRef);
+                    const data = snapshot.val();
+                    await update(statsRef, {
+                        playerCount: (data.playerCount || 0) + 1
+                    });
+                    
+                    markAsPlayed();
+                    
+                    setTimeout(() => {
+                        showWaitScreen();
+                    }, 2000);
+                }
+            }
+        }
+
+        // 判定ロジック
+        function evaluateGuess(guess, answer) {
+            const result = Array(5).fill('absent');
+            const answerChars = answer.split('');
+            const usedIndices = new Set();
+            
+            for (let i = 0; i < 5; i++) {
+                if (guess[i] === answer[i]) {
+                    result[i] = 'correct';
+                    usedIndices.add(i);
+                }
+            }
+            
+            for (let i = 0; i < 5; i++) {
+                if (result[i] === 'correct') continue;
+                
+                for (let j = 0; j < 5; j++) {
+                    if (!usedIndices.has(j) && guess[i] === answer[j]) {
+                        result[i] = 'present';
+                        usedIndices.add(j);
+                        break;
+                    }
+                }
+            }
+            
+            return result;
+        }
+
+        // ひらがな・カタカナ変換マップ
+        const hiraganaToKatakana = {
+            'あ': 'ア', 'い': 'イ', 'う': 'ウ', 'え': 'エ', 'お': 'オ',
+            'か': 'カ', 'き': 'キ', 'く': 'ク', 'け': 'ケ', 'こ': 'コ',
+            'さ': 'サ', 'し': 'シ', 'す': 'ス', 'せ': 'セ', 'そ': 'ソ',
+            'た': 'タ', 'ち': 'チ', 'つ': 'ツ', 'て': 'テ', 'と': 'ト',
+            'な': 'ナ', 'に': 'ニ', 'ぬ': 'ヌ', 'ね': 'ネ', 'の': 'ノ',
+            'は': 'ハ', 'ひ': 'ヒ', 'ふ': 'フ', 'へ': 'ヘ', 'ほ': 'ホ',
+            'ま': 'マ', 'み': 'ミ', 'む': 'ム', 'め': 'メ', 'も': 'モ',
+            'や': 'ヤ', 'ゆ': 'ユ', 'よ': 'ヨ',
+            'ら': 'ラ', 'り': 'リ', 'る': 'ル', 'れ': 'レ', 'ろ': 'ロ',
+            'わ': 'ワ', 'を': 'ヲ', 'ん': 'ン',
+            'が': 'ガ', 'ぎ': 'ギ', 'ぐ': 'グ', 'げ': 'ゲ', 'ご': 'ゴ',
+            'ざ': 'ザ', 'じ': 'ジ', 'ず': 'ズ', 'ぜ': 'ゼ', 'ぞ': 'ゾ',
+            'だ': 'ダ', 'ぢ': 'ヂ', 'づ': 'ヅ', 'で': 'デ', 'ど': 'ド',
+            'ば': 'バ', 'び': 'ビ', 'ぶ': 'ブ', 'べ': 'ベ', 'ぼ': 'ボ',
+            'ぱ': 'パ', 'ぴ': 'ピ', 'ぷ': 'プ', 'ぺ': 'ペ', 'ぽ': 'ポ',
+            'ゃ': 'ャ', 'ゅ': 'ュ', 'ょ': 'ョ', 'っ': 'ッ',
+            'ァ': 'ァ', 'ィ': 'ィ', 'ゥ': 'ゥ', 'ェ': 'ェ', 'ォ': 'ォ'
+        };
+        
+        const katakanaToHiragana = {};
+        Object.keys(hiraganaToKatakana).forEach(h => {
+            const k = hiraganaToKatakana[h];
+            katakanaToHiragana[k] = h;
+        });
+
+        // キーボード更新（ひらがな・カタカナ両方塗る）
+        function updateKeyboard(guess, result) {
+            for (let i = 0; i < 5; i++) {
+                const char = guess[i];
+                const newState = result[i];
+                
+                // ひらがな・カタカナのペアを取得
+                const hiragana = katakanaToHiragana[char] || char;
+                const katakana = hiraganaToKatakana[char] || char;
+                
+                // 両方の文字を更新
+                [hiragana, katakana].forEach(c => {
+                    const currentState = keyboardState[c];
+                    
+                    if (currentState === 'correct') return;
+                    if (currentState === 'present' && newState !== 'correct') return;
+                    
+                    keyboardState[c] = newState;
+                    
+                    const keys = keyboard.querySelectorAll('.key');
+                    keys.forEach(key => {
+                        if (key.textContent === c) {
+                            key.className = 'key';
+                            if (newState) key.classList.add(newState);
+                        }
+                    });
+                });
+            }
+        }
+
+        // メッセージ表示
+        function showMessage(text, type = '') {
+            messageEl.textContent = text;
+            messageEl.className = 'message';
+            if (type) messageEl.classList.add(type);
+            
+            if (type === 'error') {
+                setTimeout(() => {
+                    messageEl.textContent = '';
+                    messageEl.className = 'message';
+                }, 3000);
+            }
+        }
+
+        // 単語登録
+        async function registerWord() {
+            const word = pendingWord;
+            
+            if (!wordPool[word]) {
+                // Firebaseに追加
+                const wordRef = ref(db, `wordPool/${word}`);
+                await set(wordRef, {
+                    source: 'player',
+                    addedAt: new Date().toISOString()
+                });
+                
+                wordPool[word] = {
+                    source: 'player',
+                    addedAt: new Date().toISOString()
+                };
+                
+                wordPoolSizeEl.textContent = Object.keys(wordPool).length;
+                
+                showMessage(`「${word}」を登録しました！`, 'success');
+            }
+            
+            confirmModal.style.display = 'none';
+            processGuess(pendingWord);
+            pendingWord = '';
+        }
+
+        // 登録キャンセル
+        function cancelRegister() {
+            confirmModal.style.display = 'none';
+            guessInput.value = '';
+            
+            const row = board.children[currentAttempt];
+            const tiles = row.querySelectorAll('.tile');
+            tiles.forEach(tile => {
+                tile.textContent = '';
+                tile.classList.remove('filled');
+            });
+            
+            pendingWord = '';
+        }
+
+        // 待機画面表示
+        function showWaitScreen() {
+            gameArea.classList.remove('active');
+            waitScreen.style.display = 'block';
+            
+            // 結果表示
+            const resultData = JSON.parse(localStorage.getItem(`result_${currentSlot}`) || '{}');
+            if (resultData.attempts && resultData.attempts.length > 0) {
+                let html = '<h3>あなたの結果</h3><div class="result-tiles">';
+                resultData.attempts.forEach(att => {
+                    html += '<div class="result-row">';
+                    att.result.forEach(r => {
+                        const emoji = r === 'correct' ? '🟩' : r === 'present' ? '🟨' : '⬜';
+                        html += `<div class="result-tile">${emoji}</div>`;
+                    });
+                    html += '</div>';
+                });
+                html += '</div>';
+                
+                if (resultData.success) {
+                    html += `<p style="font-size: 18px; font-weight: bold; color: var(--color-correct);">${resultData.attempts.length}回で正解！</p>`;
+                } else {
+                    html += `<p style="font-size: 18px; font-weight: bold; color: #d32f2f;">失敗</p>`;
+                    if (resultData.answer) {
+                        html += `<p style="font-size: 16px; margin-top: 10px;">正解は「<strong>${resultData.answer}</strong>」でした</p>`;
+                    }
+                }
+                
+                yourResult.innerHTML = html;
+            }
+            
+            setInterval(updateCountdown, 1000);
+            updateCountdown();
+        }
+
+        // シェア機能
+        function shareResult() {
+            const resultData = JSON.parse(localStorage.getItem(`result_${currentSlot}`) || '{}');
+            if (!resultData.attempts) return;
+            
+            let text = `ことのはたんご ${formatSlotInfo(currentSlot)}\n\n`;
+            resultData.attempts.forEach(att => {
+                att.result.forEach(r => {
+                    text += r === 'correct' ? '🟩' : r === 'present' ? '🟨' : '⬜';
+                });
+                text += '\n';
+            });
+            text += `\n${resultData.success ? `${resultData.attempts.length}回で正解！` : '失敗'}\n`;
+            text += '\nhttps://your-url.github.io/kotonoha-tango/';
+            
+            if (navigator.share) {
+                navigator.share({ text: text });
+            } else {
+                navigator.clipboard.writeText(text);
+                alert('結果をクリップボードにコピーしました！');
+            }
+        }
+
+        // 初期化
+        async function init() {
+            try {
+                currentSlot = getCurrentSlot();
+                slotInfo.textContent = formatSlotInfo(currentSlot);
+                
+                await loadWordPool();
+                targetWord = await getCurrentWord();
+                
+                if (DEBUG) {
+                    console.log('答え:', targetWord);
+                    console.log('スロット:', currentSlot);
+                }
+                
+                watchStats();
+                await updateStats();
+                
+                loading.style.display = 'none';
+                
+                if (canPlay()) {
+                    gameArea.classList.add('active');
+                    createBoard();
+                    createKeyboard();
+                    
+                    guessInput.addEventListener('input', handleInput);
+                    submitBtn.addEventListener('click', handleSubmit);
+                    guessInput.addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter') handleSubmit();
+                    });
+                } else {
+                    // プレイ済みの場合、結果データに答えがなければFirebaseから取得
+                    const resultData = JSON.parse(localStorage.getItem(`result_${currentSlot}`) || '{}');
+                    if (!resultData.answer && targetWord) {
+                        resultData.answer = targetWord;
+                        localStorage.setItem(`result_${currentSlot}`, JSON.stringify(resultData));
+                    }
+                    showWaitScreen();
+                }
+                
+                registerWordBtn.addEventListener('click', registerWord);
+                cancelRegisterBtn.addEventListener('click', cancelRegister);
+                shareBtn.addEventListener('click', shareResult);
+                
+                window.onclick = function(event) {
+                    if (event.target === confirmModal) {
+                        cancelRegister();
+                    }
+                }
+            } catch (error) {
+                console.error('初期化エラー:', error);
+                loading.textContent = 'エラーが発生しました。ページを再読み込みしてください。';
+            }
+        }
+
+        init();
+    </script>
+</body>
+</html>
