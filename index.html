@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>みんなのたんご</title>
+    <title>そだてるたんご</title>
     <style>
         :root {
             --color-correct: #6aaa64;
@@ -28,13 +28,6 @@
             color: #000;
         }
         
-        .ascii-art {
-            white-space: pre;
-            font-family: 'MS Gothic', 'Osaka-等幅', 'Consolas', monospace;
-            line-height: 1.2;
-            font-size: 14px;
-        }
-        
         .container {
             max-width: 600px;
             width: 100%;
@@ -46,8 +39,7 @@
             text-align: center;
             margin-bottom: 20px;
             padding: 20px;
-            background: #e0e0e0;
-            border-bottom: 2px solid #999;
+            border-bottom: 1px solid #d3d6da;
         }
         
         h1 {
@@ -366,22 +358,27 @@
             border-radius: 8px;
         }
         
-        .ascii-art {
-            white-space: pre;
-            font-family: "MS PGothic", "Mona", "IPAMonaGothic", sans-serif;
-            line-height: 1.1;
-            font-size: 16px;
-            color: #000;
-            margin: 20px 0;
-            overflow-x: auto;
+        .cat-image {
+            max-width: 300px;
+            width: 100%;
+            height: auto;
+            margin: 20px auto;
+            display: block;
         }
         
-        .cat-message {
-            white-space: pre;
-            font-family: 'MS Gothic', 'Osaka-等幅', 'Consolas', monospace;
-            line-height: 1.2;
-            font-size: 14px;
-            margin: 20px 0;
+        .forest-image {
+            max-width: 500px;
+            width: 100%;
+            height: auto;
+            margin: 20px auto;
+            display: block;
+        }
+        
+        .result-message {
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+            margin: 15px 0;
             color: #000;
         }
         
@@ -430,7 +427,9 @@
 <body>
     <div class="container">
         <header>
-            <h1>みんなのたンゴ</h1>
+            <pre style="font-family: 'MS PGothic', 'Mona', sans-serif; line-height: 1.1; font-size: 14px; margin: 0;">＿人人人人人人人人人＿
+＞　そだてるたんご　＜
+￣Y^Y^Y^Y^Y^Y^Y^Y￣</pre>
             <div class="slot-info" id="slotInfo">読み込み中...</div>
             <div class="stats">
                 <div class="stat-item">
@@ -454,16 +453,13 @@
         
         <div class="start-screen" id="startScreen">
             <div class="tree-area">
-                <div class="ascii-art" id="treeArt"></div>
                 <p style="font-size: 18px; font-weight: bold; margin: 10px 0;">現在の辞書: <span id="startDictSize">-</span>語</p>
             </div>
             
-            <div class="cat-message">　　　∧＿∧
-　　（　´・ω・）ルール説明するにゃ！
-　　（　　つ旦Ｏ
-　　と＿_)</div>
+            <img id="startCatImage" class="cat-image" src="" alt="猫">
             
             <div class="rules">
+                <p style="font-weight: bold; margin-bottom: 15px;">ルール説明するにゃ！</p>
                 <ul style="list-style: none; padding: 0;">
                     <li>・5文字の日本語を当てるにゃ</li>
                     <li>・7回まで挑戦できるにゃ</li>
@@ -471,12 +467,9 @@
                     <li>・辞書にない単語は登録できるにゃ</li>
                     <li>・登録した単語は次回出題されるにゃ</li>
                 </ul>
+                <p style="font-weight: bold; margin-top: 15px; color: var(--color-correct);">みんながたんごを登録すると、ことばの木がそだつよ！</p>
+                <p style="font-weight: bold; margin-top: 15px;">今日も地球救っちゃう…？</p>
             </div>
-            
-            <div class="cat-message">　　　∧＿∧
-　　（　´・ω・）今日も地球
-　　（　　つ旦Ｏ　救っちゃう…？
-　　と＿_)</div>
             
             <button class="start-btn" id="startGameBtn">ゲームを始める</button>
             
@@ -492,10 +485,8 @@
             
             <div class="your-result" id="yourResult"></div>
             
-            <div class="cat-message">　　　∧＿∧
-　　（　´・ω・）みんなのおかげで
-　　（　　つ旦Ｏ　緑の惑星復活にゃ！
-　　と＿_)</div>
+            <img id="resultForestImage" class="forest-image" src="" alt="森">
+            <p class="result-message" id="resultMessage"></p>
             
             <button class="share-btn" id="shareBtn">結果をシェア</button>
         </div>
@@ -603,11 +594,13 @@
         
         // スタート画面要素
         const startGameBtn = document.getElementById('startGameBtn');
-        const treeArt = document.getElementById('treeArt');
         const startDictSize = document.getElementById('startDictSize');
         const startSlotInfo = document.getElementById('startSlotInfo');
         const startPlayerCount = document.getElementById('startPlayerCount');
         const startCorrectRate = document.getElementById('startCorrectRate');
+        const startCatImage = document.getElementById('startCatImage');
+        const resultForestImage = document.getElementById('resultForestImage');
+        const resultMessage = document.getElementById('resultMessage');
 
         // タイムスロット計算
         function getCurrentSlot() {
@@ -740,13 +733,6 @@
                     ? Math.round((data.correctCount || 0) / data.playerCount * 100)
                     : 0;
                 correctRateEl.textContent = rate + '%';
-            }
-            
-            // 木の成長を更新
-            const wordCount = Object.keys(wordPool).length;
-            const treeStage = getTreeStage(wordCount);
-            if (treeArt) {
-                treeArt.textContent = treeStage.art;
             }
         }
 
@@ -962,7 +948,28 @@
             return str.split('').map(char => katakanaToHiragana[char] || char).join('');
         }
 
-        // 木の成長段階を取得
+        // ランダムに猫画像を選択
+        function getRandomCatImage() {
+            const cats = ['cat1.png', 'cat2.png'];
+            return cats[Math.floor(Math.random() * cats.length)];
+        }
+
+        // ランダムに森画像を選択
+        function getRandomForestImage() {
+            const forests = ['forest1.png', 'forest2.png'];
+            return forests[Math.floor(Math.random() * forests.length)];
+        }
+
+        // 結果メッセージを取得
+        function getResultMessage(wordCount) {
+            if (wordCount < 300) {
+                return 'まだまだ育てるにゃ';
+            } else {
+                return '緑の惑星復活にゃ！';
+            }
+        }
+
+        // 木の成長段階を取得（削除予定だが一旦残す）
         function getTreeStage(wordCount) {
             if (wordCount < 200) {
                 return {
@@ -1100,6 +1107,13 @@
             gameArea.classList.remove('active');
             waitScreen.style.display = 'block';
             
+            // ランダムに森画像を選択
+            resultForestImage.src = getRandomForestImage();
+            
+            // 辞書数に応じたメッセージ
+            const wordCount = Object.keys(wordPool).length;
+            resultMessage.textContent = getResultMessage(wordCount);
+            
             // 結果表示
             const resultData = JSON.parse(localStorage.getItem(`result_${currentSlot}`) || '{}');
             if (resultData.attempts && resultData.attempts.length > 0) {
@@ -1135,7 +1149,7 @@
             const resultData = JSON.parse(localStorage.getItem(`result_${currentSlot}`) || '{}');
             if (!resultData.attempts) return;
             
-            let text = `みんなのたンゴ ${formatSlotInfo(currentSlot)}\n\n`;
+            let text = `そだてるたんご ${formatSlotInfo(currentSlot)}\n\n`;
             resultData.attempts.forEach(att => {
                 att.result.forEach(r => {
                     text += r === 'correct' ? '🟩' : r === 'present' ? '🟨' : '⬜';
@@ -1172,6 +1186,9 @@
                 
                 loading.style.display = 'none';
                 
+                // スタート画面の猫画像をランダムに設定
+                startCatImage.src = getRandomCatImage();
+                
                 // スタート画面の統計情報更新
                 const wordCount = Object.keys(wordPool).length;
                 startDictSize.textContent = wordCount;
@@ -1206,13 +1223,24 @@
                         if (e.key === 'Enter') handleSubmit();
                     });
                 } else {
-                    // プレイ済みの場合、結果データに答えがなければFirebaseから取得
-                    const resultData = JSON.parse(localStorage.getItem(`result_${currentSlot}`) || '{}');
-                    if (!resultData.answer && targetWord) {
-                        resultData.answer = targetWord;
-                        localStorage.setItem(`result_${currentSlot}`, JSON.stringify(resultData));
-                    }
-                    showWaitScreen();
+                    // プレイ済みの場合もスタート画面を表示
+                    startScreen.classList.add('active');
+                    
+                    // ボタンのテキストを変更
+                    startGameBtn.textContent = '結果を見る';
+                    
+                    // ボタンクリックで待機画面へ
+                    startGameBtn.addEventListener('click', () => {
+                        startScreen.classList.remove('active');
+                        
+                        // プレイ済みの場合、結果データに答えがなければFirebaseから取得
+                        const resultData = JSON.parse(localStorage.getItem(`result_${currentSlot}`) || '{}');
+                        if (!resultData.answer && targetWord) {
+                            resultData.answer = targetWord;
+                            localStorage.setItem(`result_${currentSlot}`, JSON.stringify(resultData));
+                        }
+                        showWaitScreen();
+                    });
                 }
                 
                 registerWordBtn.addEventListener('click', registerWord);
@@ -1234,4 +1262,3 @@
     </script>
 </body>
 </html>
-
