@@ -80,9 +80,9 @@
         }
         
         .wait-screen {
+            display: none;
             text-align: center;
             padding: 40px;
-            display: none;
         }
         
         .wait-screen h2 {
@@ -370,7 +370,7 @@
         }
         
         .forest-image {
-            max-width: 100%;
+            max-width: 85%;
             width: auto;
             height: auto;
             margin: 20px auto;
@@ -1005,6 +1005,7 @@
         }
 
         function showWaitScreen() {
+            startScreen.classList.remove('active');
             gameArea.classList.remove('active');
             waitScreen.style.display = 'block';
             
