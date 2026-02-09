@@ -82,6 +82,7 @@
         .wait-screen {
             text-align: center;
             padding: 40px;
+            display: none;
         }
         
         .wait-screen h2 {
@@ -369,7 +370,7 @@
         }
         
         .forest-image {
-            max-width: 150px;
+            max-width: 100%;
             width: auto;
             height: auto;
             margin: 20px auto;
@@ -469,10 +470,9 @@
                      <li>・緑色🟢: 文字が正解であり、場所も合っている。にゃ</li>
                      <li>・黄色🟡: 文字は正解に含まれているが、場所が違う。にゃ</li>
                      <li>・灰色🩶: 答えの単語に含まれていない文字。にゃ </li>
-
                     <li>・辞書にない単語は登録できるにゃ</li>
                 </ul>
-                <p style="font-weight: bold; margin-top: 15px; color: var(--color-correct);">みんながたんごを登録すると、ことばの木がそだつよ！</p>
+                <p style="font-weight: bold; margin-top: 15px; color: var(--color-correct);">みんながたんごを登録すると、ことばの木がそだつモナー</p>
             </div>
             
             <button class="start-btn" id="startGameBtn">ゲームを始める</button>
@@ -521,12 +521,10 @@
         </div>
     </div>
 
-    <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
         import { getDatabase, ref, get, set, update, onValue } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js';
 
-        // Firebase設定
         const firebaseConfig = {
             apiKey: "AIzaSyCrJ-2vCD8Nt_14bwBq-gM-sX-rcZNerNw",
             authDomain: "mutsuki-570fe.firebaseapp.com",
@@ -540,10 +538,8 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // デバッグモード
         const DEBUG = true;
 
-        // 50音キーボード
         const KEYBOARD_CHARS = [
             'あ', 'い', 'う', 'え', 'お', 'か', 'き', 'く', 'け', 'こ',
             'さ', 'し', 'す', 'せ', 'そ', 'た', 'ち', 'つ', 'て', 'と',
@@ -555,7 +551,6 @@
             'ぽ', 'ゃ', 'ゅ', 'ょ', 'っ'
         ];
 
-        // ゲーム状態
         let currentSlot = '';
         let targetWord = '';
         let currentAttempt = 0;
@@ -566,7 +561,6 @@
         let wordPool = {};
         let attempts = [];
 
-        // DOM要素
         const loading = document.getElementById('loading');
         const startScreen = document.getElementById('startScreen');
         const waitScreen = document.getElementById('waitScreen');
@@ -588,7 +582,6 @@
         const registerWordBtn = document.getElementById('registerWordBtn');
         const cancelRegisterBtn = document.getElementById('cancelRegisterBtn');
         
-        // スタート画面要素
         const startGameBtn = document.getElementById('startGameBtn');
         const startDictSize = document.getElementById('startDictSize');
         const startSlotInfo = document.getElementById('startSlotInfo');
@@ -598,7 +591,6 @@
         const resultForestImage = document.getElementById('resultForestImage');
         const resultMessage = document.getElementById('resultMessage');
 
-        // タイムスロット計算
         function getCurrentSlot() {
             const now = new Date();
             const year = now.getFullYear();
@@ -608,7 +600,6 @@
             return `${year}-${month}-${day}-${String(hour).padStart(2, '0')}`;
         }
 
-        // スロット情報表示
         function formatSlotInfo(slot) {
             const [year, month, day, hour] = slot.split('-');
             const startHour = parseInt(hour);
@@ -616,7 +607,6 @@
             return `${year}/${month}/${day} ${String(startHour).padStart(2, '0')}:00 - ${String(endHour).padStart(2, '0')}:00`;
         }
 
-        // 次のスロットまでのカウントダウン
         function updateCountdown() {
             const now = new Date();
             const currentHour = now.getHours();
@@ -637,13 +627,11 @@
             countdown.textContent = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
         }
 
-        // プレイ可能かチェック
         function canPlay() {
             const lastPlayedSlot = localStorage.getItem('lastPlayedSlot');
             return currentSlot !== lastPlayedSlot;
         }
 
-        // プレイ済みマーク
         function markAsPlayed() {
             localStorage.setItem('lastPlayedSlot', currentSlot);
             const resultData = {
@@ -654,7 +642,6 @@
             localStorage.setItem(`result_${currentSlot}`, JSON.stringify(resultData));
         }
 
-        // 単語プール取得
         async function loadWordPool() {
             const snapshot = await get(ref(db, 'wordPool'));
             if (snapshot.exists()) {
@@ -663,7 +650,6 @@
             }
         }
 
-        // 現在の単語取得または選定
         async function getCurrentWord() {
             const wordRef = ref(db, `currentWords/${currentSlot}`);
             const snapshot = await get(wordRef);
@@ -672,12 +658,10 @@
                 return snapshot.val().word;
             }
             
-            // 新しいスロットなので単語を選定
             const words = Object.keys(wordPool);
-            
-            // 過去10回分の単語を取得
             const recentSlots = await getRecentSlots(10);
             const recentWords = [];
+            
             for (const slot of recentSlots) {
                 const slotSnapshot = await get(ref(db, `currentWords/${slot}`));
                 if (slotSnapshot.exists()) {
@@ -685,13 +669,11 @@
                 }
             }
             
-            // 最近使われていない単語から選ぶ
             const availableWords = words.filter(w => !recentWords.includes(w));
             const selectedWord = availableWords.length > 0 
                 ? availableWords[Math.floor(Math.random() * availableWords.length)]
                 : words[Math.floor(Math.random() * words.length)];
             
-            // Firebaseに保存
             await set(wordRef, {
                 word: selectedWord,
                 startTime: new Date().toISOString(),
@@ -702,7 +684,6 @@
             return selectedWord;
         }
 
-        // 過去のスロット取得
         function getRecentSlots(count) {
             const slots = [];
             const now = new Date();
@@ -717,7 +698,6 @@
             return slots;
         }
 
-        // 統計更新
         async function updateStats() {
             const statsRef = ref(db, `currentWords/${currentSlot}`);
             const snapshot = await get(statsRef);
@@ -732,7 +712,6 @@
             }
         }
 
-        // リアルタイム統計監視
         function watchStats() {
             const statsRef = ref(db, `currentWords/${currentSlot}`);
             onValue(statsRef, (snapshot) => {
@@ -747,7 +726,6 @@
             });
         }
 
-        // 盤面作成
         function createBoard() {
             board.innerHTML = '';
             for (let i = 0; i < maxAttempts; i++) {
@@ -762,7 +740,6 @@
             }
         }
 
-        // キーボード作成
         function createKeyboard() {
             keyboard.innerHTML = '';
             KEYBOARD_CHARS.forEach(char => {
@@ -780,7 +757,6 @@
             });
         }
 
-        // 入力処理
         function handleInput() {
             const val = guessInput.value;
             const row = board.children[currentAttempt];
@@ -796,7 +772,6 @@
             }
         }
 
-        // 決定ボタン処理
         async function handleSubmit() {
             if (gameOver) return;
             
@@ -807,7 +782,6 @@
                 return;
             }
             
-            // 辞書チェック
             if (!wordPool[guess]) {
                 pendingWord = guess;
                 confirmMessage.textContent = `「${guess}」は辞書にありません。\n登録しますか？（次回以降の出題に使われます）`;
@@ -818,7 +792,6 @@
             processGuess(guess);
         }
 
-        // 推測処理
         async function processGuess(guess) {
             const result = evaluateGuess(guess, targetWord);
             const row = board.children[currentAttempt];
@@ -829,8 +802,6 @@
             });
             
             updateKeyboard(guess, result);
-            
-            // 試行記録
             attempts.push({ word: guess, result: result });
             
             guessInput.value = '';
@@ -838,12 +809,10 @@
             const currentTiles = currentRow.querySelectorAll('.tile');
             currentTiles.forEach(tile => tile.classList.remove('filled'));
             
-            // 勝敗判定
             if (toHiragana(guess) === toHiragana(targetWord)) {
                 gameOver = true;
                 showMessage('🎉 正解！おめでとうございます！', 'success');
                 
-                // 統計更新
                 const statsRef = ref(db, `currentWords/${currentSlot}`);
                 const snapshot = await get(statsRef);
                 const data = snapshot.val();
@@ -863,7 +832,6 @@
                     gameOver = true;
                     showMessage(`😢 残念！正解は「${targetWord}」でした`, 'error');
                     
-                    // 統計更新（失敗）
                     const statsRef = ref(db, `currentWords/${currentSlot}`);
                     const snapshot = await get(statsRef);
                     const data = snapshot.val();
@@ -880,9 +848,7 @@
             }
         }
 
-        // 判定ロジック
         function evaluateGuess(guess, answer) {
-            // ひらがなに統一して判定
             const normalizedGuess = toHiragana(guess);
             const normalizedAnswer = toHiragana(answer);
             
@@ -912,7 +878,6 @@
             return result;
         }
 
-        // ひらがな・カタカナ変換マップ
         const hiraganaToKatakana = {
             'あ': 'ア', 'い': 'イ', 'う': 'ウ', 'え': 'エ', 'お': 'オ',
             'か': 'カ', 'き': 'キ', 'く': 'ク', 'け': 'ケ', 'こ': 'コ',
@@ -939,24 +904,20 @@
             katakanaToHiragana[k] = h;
         });
 
-        // 文字列をひらがなに統一
         function toHiragana(str) {
             return str.split('').map(char => katakanaToHiragana[char] || char).join('');
         }
 
-        // ランダムに猫画像を選択
         function getRandomCatImage() {
             const cats = ['cat1.png', 'cat2.png'];
             return cats[Math.floor(Math.random() * cats.length)];
         }
 
-        // ランダムに森画像を選択
         function getRandomForestImage() {
             const forests = ['forest1.png', 'forest2.png'];
             return forests[Math.floor(Math.random() * forests.length)];
         }
 
-        // 結果メッセージを取得
         function getResultMessage(wordCount) {
             if (wordCount < 300) {
                 return 'まだまだ育てるにゃ';
@@ -965,64 +926,14 @@
             }
         }
 
-        // 木の成長段階を取得（削除予定だが一旦残す）
-        function getTreeStage(wordCount) {
-            if (wordCount < 200) {
-                return {
-                    art: `　　　∧＿∧
-　　（　´・ω・）種をまいたよ
-　　（　　つ●Ｏ
-　　と＿_)`,
-                    message: 'みんなで種をまいたよ！'
-                };
-            } else if (wordCount < 500) {
-                return {
-                    art: `　　　　　∧
-　　　　／|＼
-　　　∧＿∧
-　　（　´・ω・）芽が出たよ！
-　　（　　つ旦Ｏ
-　　と＿_)`,
-                    message: 'みんなで芽を育ててるよ！'
-                };
-            } else if (wordCount < 1000) {
-                return {
-                    art: `　　　　＼|／
-　　　──┼──
-　　　　／|＼
-　　　　　｜
-　　　∧＿∧
-　　（　´・ω・）木が育ったよ！
-　　（　　つ旦Ｏ
-　　と＿_)`,
-                    message: 'みんなで木を育ててるよ！'
-                };
-            } else {
-                return {
-                    art: `ｖｖｖ　ｖｖ　ｖｖｖ　　ｖｖｖ　　ｖｖ　　ｖｖ
-　ｖｖｖ　　　ｖｖｖ　　ｖｖ　　　ｖｖ　ｖｖｖ　　ｖｖ
-　　ｖｖ　　ｖｖｖ　ｖｖ　　ｖｖｖ　　　ｖｖ　ｖｖｖ
-　　　ｖｖ　　　ｖｖ　　∧＿∧　　ｖｖ　　　ｖｖ
-　　ｖｖ　ｖｖｖ　　（　´・ω・）　ｖｖｖ　ｖｖ
-　ｖｖ　　　ｖｖ　（　　つ旦Ｏ　ｖｖ　　　ｖｖｖ
-　　ｖｖｖ　　ｖｖ　と＿_)　　ｖｖ　　ｖｖ
-　　　ｖｖ　ｖｖｖ　　　ｖｖ　　ｖｖｖ　ｖｖ`,
-                    message: 'みんなのおかげで森になったよ！'
-                };
-            }
-        }
-
-        // キーボード更新（ひらがな・カタカナ両方塗る）
         function updateKeyboard(guess, result) {
             for (let i = 0; i < 5; i++) {
                 const char = guess[i];
                 const newState = result[i];
                 
-                // ひらがな・カタカナのペアを取得
                 const hiragana = katakanaToHiragana[char] || char;
                 const katakana = hiraganaToKatakana[char] || char;
                 
-                // 両方の文字を更新
                 [hiragana, katakana].forEach(c => {
                     const currentState = keyboardState[c];
                     
@@ -1042,7 +953,6 @@
             }
         }
 
-        // メッセージ表示
         function showMessage(text, type = '') {
             messageEl.textContent = text;
             messageEl.className = 'message';
@@ -1056,12 +966,10 @@
             }
         }
 
-        // 単語登録
         async function registerWord() {
             const word = pendingWord;
             
             if (!wordPool[word]) {
-                // Firebaseに追加
                 const wordRef = ref(db, `wordPool/${word}`);
                 await set(wordRef, {
                     source: 'player',
@@ -1074,7 +982,6 @@
                 };
                 
                 wordPoolSizeEl.textContent = Object.keys(wordPool).length;
-                
                 showMessage(`「${word}」を登録しました！`, 'success');
             }
             
@@ -1083,7 +990,6 @@
             pendingWord = '';
         }
 
-        // 登録キャンセル
         function cancelRegister() {
             confirmModal.style.display = 'none';
             guessInput.value = '';
@@ -1098,19 +1004,15 @@
             pendingWord = '';
         }
 
-        // 待機画面表示
         function showWaitScreen() {
             gameArea.classList.remove('active');
             waitScreen.style.display = 'block';
             
-            // ランダムに森画像を選択
             resultForestImage.src = getRandomForestImage();
             
-            // 辞書数に応じたメッセージ
             const wordCount = Object.keys(wordPool).length;
             resultMessage.textContent = getResultMessage(wordCount);
             
-            // 結果表示
             const resultData = JSON.parse(localStorage.getItem(`result_${currentSlot}`) || '{}');
             if (resultData.attempts && resultData.attempts.length > 0) {
                 let html = '<h3>あなたの結果</h3><div class="result-tiles">';
@@ -1140,7 +1042,6 @@
             updateCountdown();
         }
 
-        // シェア機能
         function shareResult() {
             const resultData = JSON.parse(localStorage.getItem(`result_${currentSlot}`) || '{}');
             if (!resultData.attempts) return;
@@ -1163,7 +1064,6 @@
             }
         }
 
-        // 初期化
         async function init() {
             try {
                 currentSlot = getCurrentSlot();
@@ -1182,10 +1082,8 @@
                 
                 loading.style.display = 'none';
                 
-                // スタート画面の猫画像をランダムに設定
                 startCatImage.src = getRandomCatImage();
                 
-                // スタート画面の統計情報更新
                 const wordCount = Object.keys(wordPool).length;
                 startDictSize.textContent = wordCount;
                 startSlotInfo.textContent = formatSlotInfo(currentSlot);
@@ -1202,10 +1100,8 @@
                 }
                 
                 if (canPlay()) {
-                    // スタート画面を表示
                     startScreen.classList.add('active');
                     
-                    // ゲーム開始ボタン
                     startGameBtn.addEventListener('click', () => {
                         startScreen.classList.remove('active');
                         gameArea.classList.add('active');
@@ -1219,17 +1115,12 @@
                         if (e.key === 'Enter') handleSubmit();
                     });
                 } else {
-                    // プレイ済みの場合もスタート画面を表示
                     startScreen.classList.add('active');
-                    
-                    // ボタンのテキストを変更
                     startGameBtn.textContent = '結果を見る';
                     
-                    // ボタンクリックで待機画面へ
                     startGameBtn.addEventListener('click', () => {
                         startScreen.classList.remove('active');
                         
-                        // プレイ済みの場合、結果データに答えがなければFirebaseから取得
                         const resultData = JSON.parse(localStorage.getItem(`result_${currentSlot}`) || '{}');
                         if (!resultData.answer && targetWord) {
                             resultData.answer = targetWord;
